@@ -1,5 +1,6 @@
 const Tesseract = require("tesseract.js")
 const path = require("path")
+const _ = require("lodash")
 
 const listCurrencies = require('./list-currencies.json')
 
@@ -21,9 +22,10 @@ module.exports = (req, res) => {
           total: "",
           tva: "",
           name:"",
-          currency: getCurrency(result.text),
+          currency: "",
           all: splittedResult
         }
+        finalResult.currency = getCurrency(result.text)
         for(let i = 0; i<splittedResult.length; i++){
           if(isDate(splittedResult[i]) === true){
             finalResult.date = getDate(splittedResult[i])
@@ -43,13 +45,30 @@ module.exports = (req, res) => {
        })
 };
 
+function countOccurence(string,char) {
+  console.log(string);
+  console.log(char);
+  var re = new RegExp(char,"gi");
+  if(Array.isArray(string.match(re))) return string.match(re).length
+  else return 0
+}
+
+function getMax(data){
+  console.log(data)
+  return _.maxBy(data, function(o) { return o; })
+}
 
 function getCurrency(text){
-  let result=[];
-  for(let i = 0; i < listCurrencies.length; i++){
-    console.log(listCurrencies[i]);
-    console.log(text.test(Regex(listCurrencies[i].symbol)))
+  let result=[]
+  let currenciesCount = {}
+  for(var currentCurency in listCurrencies){
+    let symbol = listCurrencies[currentCurency].symbol
+    let count = countOccurence(text,symbol)
+    if(count > 0){
+      currenciesCount.push = {symbol : symbol, count : count}
+    }
   }
+  console.log(getMax(currenciesCount))
 }
 function isDate(text){
   const regexPattern = /(\d{4}([.\-/ ])\d{2}\2\d{2}|\d{2}([.\-/ ])\d{2}\3\d{4})/
